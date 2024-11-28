@@ -5,13 +5,17 @@ const remoteRef = document.querySelector("#remote-video");
 const remoteMuteVideo = document.querySelector("#remoteMuteVideo");
 const remoteMuteAudio = document.querySelector("#remoteMuteAudio");
 
+const chatInput = document.getElementById("chat-input");
+const chatMessages = document.getElementById("chat-messages");
+const sendButton = document.getElementById("send-button");
+
 let peer, remoteUsers;
 
 // Получаем call_id из URL
 const urlParams = new URLSearchParams(window.location.search);
 const callId = urlParams.get("call_id");
 
-const socket = io("https://ifinduway-server-1b44.twc1.net/", {
+const socket = io("https://ifinduway-server-65d0.twc1.net", {
   query: {
     call_id: callId,
   },
@@ -94,6 +98,11 @@ const initializeConnection = () => {
   });
 
   socket.on("end-call", () => {
+
+    // убираем иконки
+    remoteMuteAudio.style.display = "none";
+
+    remoteMuteVideo.style.display = "none";
     // Останавливаем текущее соединение
     peer.destroy();
 
@@ -229,6 +238,18 @@ function toggleMic() {
   console.log("TOGGLE MIC: ", isAudioStart);
 }
 
+
+function toggleChat() {
+  isShowChat = !isShowChat;
+
+  const chat = document.querySelector("#chat-container");
+  if (!isShowChat) {
+    chat.classList.remove("chat-showed");
+  } else {
+    chat.classList.add("chat-showed");
+  }
+}
+
 previewInit();
 
 // Обработчик события приема состояния микрофона от сервера
@@ -251,3 +272,49 @@ socket.on("toggle-camera", (isVideoStart) => {
     remoteMuteVideo.style.display = "none";
   }
 });
+
+
+
+// чат
+
+
+sendButton.addEventListener("click", sendMessage);
+
+chatInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+
+
+function sendMessage() {
+  const messageText = chatInput.value.trim();
+  if (messageText === "") return;
+
+  const message = {
+    text: messageText,
+  };
+
+  // Отправляем сообщение на сервер
+  socket.emit("send-message", message);
+
+  chatInput.value = "";
+}
+
+// Получение истории чата от сервера
+socket.on("chat-history", (messages) => {
+  chatMessages.innerHTML = ""; // Очищаем окно чата
+  messages.forEach((message) => addMessageToChat(message));
+});
+
+// Получение новых сообщений от других пользователей
+socket.on("receive-message", (message) => {
+  addMessageToChat(message);
+});
+
+function addMessageToChat(message) {
+  const messageElement = document.createElement("div");
+  messageElement.textContent = `[${new Date(message.timestamp).toLocaleTimeString()}] ${message.senderId === socket.id ? "Вы" : "Другой"
+    }: ${message.text}`;
+  chatMessages.appendChild(messageElement);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}

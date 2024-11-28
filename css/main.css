@@ -202,7 +202,8 @@ samp {
 }
 #local-video {
   position: absolute;
-  left: 0;
+  left: 30px;
+  top: 30px;
   width: 300px;
   -webkit-transform: scaleX(-1);
   transform: scaleX(-1);
@@ -229,12 +230,8 @@ samp {
   bottom: 20px;
 }
 #remote-video {
-  position: absolute;
   max-width: 100%;
   height: 80dvh;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 #toggle-mic {
@@ -272,6 +269,24 @@ samp {
   height: 56px;
 }
 
+#toggle-chat {
+  background: transparent;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  color: white;
+  background-image: url("../img/chat.svg");
+  background-size: contain;
+  background-position: center;
+  background-size: 60%;
+  background-repeat: no-repeat;
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+#toggle-chat.chat-showed {
+}
+
 #local-video-preview {
 }
 
@@ -284,15 +299,6 @@ samp {
 #toggle-mic:not(.disable-settings-button):hover,
 #end-call:not(.disable-settings-button):hover {
   background-color: rgba(255, 255, 255, 0.3);
-}
-
-#toggle-chat {
-  padding: 8px;
-  background: transparent;
-  border-radius: 50%;
-  border: 1px solid #fff;
-  color: white;
-  margin: 16px 8px;
 }
 
 #end-call {
@@ -332,13 +338,6 @@ samp {
 
 .video-preview-wrapper {
   position: relative;
-  background: linear-gradient(
-    to bottom,
-    rgba(38, 38, 38, 1) 0%,
-    rgba(61, 61, 61, 1) 18%,
-    rgba(46, 46, 46, 1) 87%,
-    rgba(38, 38, 38, 1) 100%
-  );
   display: flex;
   flex-direction: column;
 
@@ -367,17 +366,25 @@ samp {
 
 .local-video-controls {
   position: absolute;
-  margin-bottom: 7px;
   display: flex;
   gap: 10px;
   align-self: center;
-  bottom: 10px;
+  bottom: 0;
+  width: 100%;
+  justify-content: center;
+  background: linear-gradient(
+    to top,
+    rgba(48, 48, 48, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  padding-bottom: 10px;
+  padding-top: 100px;
 }
 
 .remote-controls {
   position: absolute;
-  bottom: 100px;
-  right: 150px;
+  bottom: 30px;
+  left: 30px;
   display: flex;
 }
 
@@ -387,7 +394,8 @@ samp {
 }
 
 #toggle-camera:hover,
-#toggle-mic:hover {
+#toggle-mic:hover,
+#toggle-chat {
   opacity: 0.8;
   cursor: pointer;
 }
@@ -407,4 +415,95 @@ samp {
   .video-conference {
     flex-direction: column;
   }
+}
+
+#chat-container {
+  display: none;
+  border: 1px solid #fff;
+  padding: 30px;
+  border-radius: 30px;
+  background-color: #fff;
+  width: 300px;
+  height: 400px;
+  flex-direction: column;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: #333;
+  font-size: 16px;
+}
+
+#chat-container.chat-showed {
+  display: flex;
+}
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+#chat-input {
+  width: calc(100% - 60px);
+  padding: 10px;
+  outline: none;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-weight: 100;
+  color: #333;
+}
+
+#chat-input::placeholder {
+  opacity: 0.1;
+}
+
+#send-button {
+  background: transparent;
+  border-radius: 30px;
+  border: 1px solid #fff;
+  color: white;
+  background-image: url("../img/send.svg");
+  background-size: contain;
+  background-position: center;
+  background-size: 100%;
+  background-repeat: no-repeat;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.chat-controls {
+  position: relative;
+}
+
+.chat-controls #send-button {
+  position: absolute;
+  right: 50px;
+  bottom: 18px;
+}
+
+.chat-close {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 30px;
+  height: 30px;
+  background-image: url("../img/chat-close.svg");
+  background-size: cover;
+  cursor: pointer;
+}
+
+.video-remote-wrapper {
+  position: absolute;
+  max-width: 100%;
+  height: 80dvh;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid #fff;
+  border-radius: 30px;
+  overflow: hidden;
 }
