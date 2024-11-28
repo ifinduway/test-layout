@@ -143,18 +143,6 @@ async function callUser() {
   }
 }
 
-function toggleChat() {
-  if (isShowChat) {
-    // убрать чат
-    document.getElementById("kt_drawer_chat").classList.remove("drawer-on");
-    document.getElementById("drawer-overlay").style.display = "none";
-  } else {
-    // показать чат
-    document.getElementById("kt_drawer_chat").classList.add("drawer-on");
-    document.getElementById("drawer-overlay").style.display = "block";
-  }
-  isShowChat = !isShowChat;
-}
 
 function endCall() {
   // Отправляем событие на сервер о завершении вызова
@@ -170,7 +158,6 @@ function endCall() {
 
   // Скрываем элементы интерфейса для видеовызова
   document.querySelector("#live").style.display = "none";
-  document.getElementById("drawer-overlay").style.display = "none";
 
   // Удаляем обработчики событий
   socket.off("signal");
