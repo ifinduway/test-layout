@@ -15,7 +15,7 @@ let peer, remoteUsers;
 const urlParams = new URLSearchParams(window.location.search);
 const callId = urlParams.get("call_id");
 
-const socket = io("https://ifinduway-server-65d0.twc1.net", {
+const socket = io("https://ifinduway-server-a38a.twc1.net", {
   query: {
     call_id: callId,
   },
