@@ -386,6 +386,17 @@ samp {
   bottom: 30px;
   left: 30px;
   display: flex;
+  flex-direction: column;
+}
+
+.buttons-wrapper {
+  display: flex;
+}
+
+.remote-name {
+  color: #fff;
+  text-align: center;
+  padding: 8px;
 }
 
 .remote-controls #remoteMuteAudio,
@@ -523,5 +534,10 @@ samp {
   #local-video {
     width: 20%;
     left: 0;
+  }
+
+  .remote-controls {
+    left: 0;
+    bottom: 80px;
   }
 }
