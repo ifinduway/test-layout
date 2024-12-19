@@ -122,7 +122,15 @@ const initializeConnection = () => {
 const startVideoChat = async () => {
   localRefPreview.srcObject = null;
   try {
-    peer = new SimplePeer({ initiator: true, stream });
+    peer = new SimplePeer({
+      initiator: true,
+      stream,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" }, // Google STUN сервер
+        ],
+      },
+    });
 
     peer.on("signal", (data) => {
       socket.emit("signal", data);
