@@ -98,7 +98,6 @@ const initializeConnection = () => {
   });
 
   socket.on("end-call", () => {
-
     // убираем иконки
     remoteMuteAudio.style.display = "none";
 
@@ -159,7 +158,6 @@ async function callUser() {
     }
   }
 }
-
 
 function endCall() {
   // Отправляем событие на сервер о завершении вызова
@@ -246,7 +244,6 @@ function toggleMic() {
   console.log("TOGGLE MIC: ", isAudioStart);
 }
 
-
 function toggleChat() {
   isShowChat = !isShowChat;
 
@@ -281,18 +278,13 @@ socket.on("toggle-camera", (isVideoStart) => {
   }
 });
 
-
-
 // чат
-
 
 sendButton.addEventListener("click", sendMessage);
 
 chatInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
-
-
 
 function sendMessage() {
   const messageText = chatInput.value.trim();
@@ -321,8 +313,27 @@ socket.on("receive-message", (message) => {
 
 function addMessageToChat(message) {
   const messageElement = document.createElement("div");
-  messageElement.textContent = `[${new Date(message.timestamp).toLocaleTimeString()}] ${message.senderId === socket.id ? "Вы" : "Другой"
-    }: ${message.text}`;
+  messageElement.classList.add("chat-message");
+
+  // Создаем отдельный div для времени
+  const timeElement = document.createElement("div");
+  timeElement.classList.add("chat-time");
+  timeElement.textContent = `[${new Date(message.timestamp).toLocaleTimeString(
+    [],
+    { hour: "2-digit", minute: "2-digit" }
+  )}]`;
+
+  // Создаем отдельный div для текста сообщения
+  const textElement = document.createElement("div");
+  textElement.classList.add("chat-text");
+  textElement.textContent = `${
+    message.senderId === socket.id ? "Вы" : "Другой"
+  }: ${message.text}`;
+
+  // Добавляем элементы в основной элемент сообщения
+  messageElement.appendChild(timeElement);
+  messageElement.appendChild(textElement);
+
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
