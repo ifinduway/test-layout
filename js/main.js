@@ -48,10 +48,10 @@ if (isAudioStart) {
 }
 
 const previewInit = async () => {
-  devices = await navigator.mediaDevices.enumerateDevices();
+  devices = await navigator.mediaDevices?.enumerateDevices();
 
-  const hasVideoInput = devices.some((device) => device.kind === "videoinput");
-  const hasAudioInput = devices.some((device) => device.kind === "audioinput");
+  const hasVideoInput = devices?.some((device) => device.kind === "videoinput");
+  const hasAudioInput = devices?.some((device) => device.kind === "audioinput");
 
   if (!hasVideoInput) {
     console.log("lel hasVideoInput:", hasVideoInput);
@@ -83,7 +83,7 @@ const previewInit = async () => {
     console.log("MICROPHONE IS NOT AVAILABLE");
   }
 
-  stream = await navigator.mediaDevices.getUserMedia({
+  stream = await navigator.mediaDevices?.getUserMedia({
     video: hasVideoInput,
     audio: hasAudioInput,
   });
@@ -326,9 +326,8 @@ function addMessageToChat(message) {
   // Создаем отдельный div для текста сообщения
   const textElement = document.createElement("div");
   textElement.classList.add("chat-text");
-  textElement.textContent = `${
-    message.senderId === socket.id ? "Вы" : "Другой"
-  }: ${message.text}`;
+  textElement.textContent = `${message.senderId === socket.id ? "Вы" : "Другой"
+    }: ${message.text}`;
 
   // Добавляем элементы в основной элемент сообщения
   messageElement.appendChild(timeElement);
@@ -337,3 +336,97 @@ function addMessageToChat(message) {
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
+
+
+// ДЕМКА ЭКРАНА
+
+let isSharingScreen = false; // Флаг для отслеживания состояния демонстрации
+let screenStream = null; // Поток экрана
+
+// Включение демонстрации экрана
+function startScreenShare() {
+  navigator.mediaDevices
+    .getDisplayMedia({ video: true, audio: false }) // Захватываем только видео с экрана
+    .then((screenStream) => {
+      // Сохраняем аудиодорожку из исходного потока (микрофон)
+      const audioTracks = stream.getAudioTracks();
+
+      // Создаем новый поток, объединяющий видео с экрана и аудио из микрофона
+      const combinedStream = new MediaStream([
+        ...screenStream.getVideoTracks(), // Видео с экрана
+        ...audioTracks, // Аудио из микрофона
+      ]);
+
+      // Останавливаем старый поток
+      // stream.getTracks().forEach(track => track.stop());
+
+      // Устанавливаем новый объединенный поток
+      localRef.srcObject = combinedStream;
+
+      // Заменяем поток в WebRTC соединении
+      peer.removeStream(stream); // Удаляем старый поток
+      peer.addStream(combinedStream); // Добавляем новый поток
+
+      // Сохраняем текущий поток
+      stream = combinedStream;
+
+      // Уведомляем второго пользователя о начале демонстрации экрана
+      socket.emit("start-screen-share", { peerId: peer.id });
+
+      // Управление состоянием кнопок
+      document.getElementById("start-screen-share").disabled = true; // Отключаем кнопку "Начать демонстрацию экрана"
+      document.getElementById("stop-screen-share").disabled = false; // Включаем кнопку "Остановить демонстрацию экрана"
+
+      // Добавляем обработчик остановки демонстрации экрана
+      screenStream.getVideoTracks()[0].onended = () => {
+        stopScreenShare();
+      };
+    })
+    .catch((error) => {
+      console.error("Error accessing screen share:", error);
+    });
+}
+
+function stopScreenShare() {
+  if (stream) {
+    // Останавливаем текущий поток экрана
+    stream.getTracks().forEach(track => track.stop());
+
+    // Возвращаемся к видеокамере и микрофону
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((cameraStream) => {
+        // Устанавливаем новый поток (камера + микрофон)
+        localRef.srcObject = cameraStream;
+
+        // Заменяем поток в WebRTC соединении
+        peer.removeStream(stream); // Удаляем старый поток
+        peer.addStream(cameraStream); // Добавляем новый поток
+
+        // Сохраняем текущий поток
+        stream = cameraStream;
+
+        // Уведомляем второго пользователя о завершении демонстрации экрана
+        socket.emit("stop-screen-share", { peerId: peer.id });
+
+        // Управление состоянием кнопок
+        document.getElementById("start-screen-share").disabled = false; // Включаем кнопку "Начать демонстрацию экрана"
+        document.getElementById("stop-screen-share").disabled = true; // Отключаем кнопку "Остановить демонстрацию экрана"
+      })
+      .catch((error) => {
+        console.error("Error accessing media devices:", error);
+      });
+  }
+}
+
+socket.on("stop-screen-share", (data) => {
+  console.log("Screen sharing stopped by peer:", data.peerId);
+
+  // // Подключаемся обратно к видеокамере через PeerJS
+  // const connection = peer.connect(data.peerId);
+
+  // connection.on("stream", (cameraStream) => {
+  //   const remoteVideo = document.getElementById("remote-video");
+  //   remoteVideo.srcObject = cameraStream;
+  // });
+});
